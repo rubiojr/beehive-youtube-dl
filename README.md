@@ -21,7 +21,7 @@ Make sure the Redis server and Beehive are running, then:
 
 **To enqueue a video**
 
-`beeydl queue https://www.youtube.com/watch?v=6W5pq4bIzIw`
+`beeydl queue https://www.youtube.com/watch?v=os8FvDpfKfw`
 
 
 **To download videos in the queue**
