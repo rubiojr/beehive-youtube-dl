@@ -1,0 +1,116 @@
+#!/bin/bash
+#
+# Usage:
+#   beeydl queue <url> # to enqueue a video for downloading
+#   beeydl poll        # to poll for videos in the queue and download them
+#   beeydl clear       # to remove all videos from the download queue
+#   beeydl list        # to list all videos in the download queue
+#
+# Notes:
+#
+#  * The current implementation expects Beehive, youtube-dl and redis-server/cli to be
+#    to be available locally.
+#  * Use `beeydl poll` in a separate process to poll and download videos
+#  * Use `beeydl queue https://youtube.com/XXXXX` to enqueue videos to be downloaded
+#
+set -e
+
+
+beehive_host=localhost
+beehive_port=12345
+redis_chan="youtube-dl"
+
+usage() {
+   echo "Usage: beeydl queue <url> # to enqueue a video for downloading" >&2
+   echo "       beeydl poll        # to poll for videos in the queue and download them" >&2
+   echo "       beeydl clear       # to remove all videos from the download queue" >&2
+   echo "       beeydl list        # to list all videos in the download queue" >&2
+   exit 2
+}
+
+video_downloaded() {
+  redis-cli PUBLISH "$redis_chan" "Video $1 downloaded"
+}
+
+download_video() {
+  youtube-dl "https://youtu.be/$1"
+}
+
+queue_empty() {
+  [ "$(redis-cli --raw keys "/youtube-dl/*" | grep youtube-dl | wc -l)" = 0 ] && return 0
+  return 1
+}
+
+poll_videos() {
+  echo "Polling for videos to download..."
+  while true; do
+    if queue_empty; then
+      sleep 1
+    fi
+
+    for v in $(redis-cli --raw keys "/youtube-dl/*"); do
+      vid=$(echo $v | cut -d / -f3)
+      # Delete the video from the queue
+      if download_video "$vid"; then
+        video_downloaded "$vid"
+        redis-cli DEL "$v"
+      fi
+    done
+  done
+}
+
+queue_video() {
+  local url="$1"
+  local video_id=$(echo "${url#*v=}")
+
+  curl "$beehive_host:$beehive_port/$video_id" \
+       --header "Content-Type: application/json" \
+       --data "{url: \"$url\"}"
+}
+
+preflight_check() {
+  true
+  which youtube-dl || {
+    echo "youtube-dl not available, install it first" >&2
+    exit 1
+  }
+  which redis-cli || {
+    echo "redis-cli not available, install it first" >&2
+    exit 1
+  }
+}
+
+case $1 in
+  poll)
+    poll_videos
+    ;;
+  queue)
+    echo "Adding video '$2' to the queue."
+    queue_video "$2"
+    ;;
+  list)
+    if queue_empty; then
+      echo "No videos."
+    else
+      echo "Videos awaiting to be downloaded:"
+      redis-cli --raw keys "/youtube-dl/*"
+      echo
+      echo "Run 'beeydl poll' to download them."
+    fi
+    ;;
+  clear)
+    if ! queue_empty; then
+      redis-cli --raw --scan --pattern "/youtube-dl/*" | xargs redis-cli del 
+      echo "Video download queue cleared."
+    fi
+    ;;
+  --help|-h)
+    usage
+    ;;
+  *)
+    echo "Invalid arguments." >&2
+    echo
+    usage
+    ;;
+esac
+
