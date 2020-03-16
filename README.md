@@ -9,7 +9,54 @@ Example [Beehive](https://github.com/muesli/beehive) based video downloader impl
 
 Needs https://github.com/muesli/beehive/pull/272 so you'll need to build Beehive from that branch.
 
-Sample `beehive.conf` included. Needs Pushover token `changeme` to be replaced with a real token for the notifications to work. 
+Sample `beehive.conf` included. Needs Pushover token `changeme` to be replaced with a real token for the notifications to work.
+
+## Workflow
+
+Queueing videos:
+
+```
+
+
+
+                     POST YouTube URL     +------------------------+   Save URL   +-------------+
+                                          |                        |              |             |
+   beeydl queue  -----------------------> |  Beehive HTTP server   +--------------> Redis Server
+                                          |                        |              |             |
+                                          +------------------------+              +-------------+
+                                                            |
+                                                            |         +------------+
+                                                            +-------->+            |
+                                                                      |  Pushover  |
+                                                Send notification     |            |
+                                                                      +------------+
+
+```
+
+Downloading videos:
+
+```
+
+                     +-------------+
+                     |             |
+   beeydl poll  +---->  Redis Chan |
+         +      |    |             |
+         v      |    +-------------+
+      get key   |
+         +      |    +-------------------------+
+         v      +----+                         |
+    youtube-dl  |    | Download queued Video   |
+         +      |    |                         |
+         |      |    +-------------------------+
+         |      |
+         v      |    +-------------+
+   publish msg  +--->+             |
+                     | Redis Chan  |         +----------+                +------------+
+                     |             |         |          |                |            |
+                     +-------------+         | Beehive  | +------------->+  Pushover  |
+                                 +---------->+          |                |            |
+                                             +----------+                +------------+
+```
 
 ## Usage
 
