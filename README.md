@@ -80,3 +80,5 @@ You can then queue videos locally using:
 ```
 
 A `ydl-video` directory will be created automatically in the current directory and the videos will be downloaded there.
+
+A `config` directory will also be created to persist Beehive's configuration. 
