@@ -1,7 +1,21 @@
 #!/bin/sh
+
 REDIS_HOST=${REDIS_HOST:-localhost}
-sed -i "s/pushover_app_token/$PUSHOVER_APP_TOKEN/" beehive.conf
-sed -i "s/pushover_user_token/$PUSHOVER_USER_TOKEN/" beehive.conf
-sed -i "s/redis_host/$REDIS_HOST/" beehive.conf
+
+cleanup() {
+  kill $(pidof beehive)
+}
+
+trap cleanup SIGINT
+trap cleanup SIGTERM
+
+# First run config
+if [ ! -f /root/config/beehive.conf ]; then
+  echo "Configuring Beehive for the first time..."
+  sed -i "s/pushover_app_token/$PUSHOVER_APP_TOKEN/" beehive.conf
+  sed -i "s/pushover_user_token/$PUSHOVER_USER_TOKEN/" beehive.conf
+  sed -i "s/redis_host/$REDIS_HOST/" beehive.conf
+  mv beehive.conf config/
+fi
 beeydl poll > beeydl.log 2>&1 &
-./beehive --bind 0.0.0.0:8181 
+exec ./beehive --config config/beehive.conf --debug --bind 0.0.0.0:8181

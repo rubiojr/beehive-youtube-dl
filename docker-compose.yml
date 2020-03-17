@@ -17,6 +17,7 @@ services:
      - PUSHOVER_APP_TOKEN=${PUSHOVER_APP_TOKEN}
     volumes:
      - ./ydl-video:/root/video
+     - ./config:/root/config
   redis:
     hostname: redis
     image: redis
