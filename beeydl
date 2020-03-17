@@ -15,10 +15,11 @@
 #
 set -e
 
-
 beehive_host=localhost
 beehive_port=12345
 redis_chan="youtube-dl"
+redis_host=${REDIS_HOST:-localhost}
+video_dir=${VIDEO_DIR:-video}
 
 usage() {
    echo "Usage: beeydl queue <url> # to enqueue a video for downloading" >&2
@@ -29,31 +30,33 @@ usage() {
 }
 
 video_downloaded() {
-  redis-cli PUBLISH "$redis_chan" "Video $1 downloaded"
+  redis-cli -h $redis_host PUBLISH "$redis_chan" "Video $1 has been downloaded"
 }
 
 download_video() {
-  youtube-dl "https://youtu.be/$1"
+  youtube-dl --download-archive "$video_dir/archive.log" -o "$video_dir/%(title)s.%(ext)s" \
+             "https://youtu.be/$1"
 }
 
 queue_empty() {
-  [ "$(redis-cli --raw keys "/youtube-dl/*" | grep youtube-dl | wc -l)" = 0 ] && return 0
+  [ "$(redis-cli -h $redis_host --raw keys "/youtube-dl/*" | grep youtube-dl | wc -l)" = 0 ] && return 0
   return 1
 }
 
 poll_videos() {
   echo "Polling for videos to download..."
+  mkdir -p $video_dir
   while true; do
     if queue_empty; then
       sleep 1
     fi
 
-    for v in $(redis-cli --raw keys "/youtube-dl/*"); do
+    for v in $(redis-cli -h $redis_host --raw keys "/youtube-dl/*"); do
       vid=$(echo $v | cut -d / -f3)
       # Delete the video from the queue
       if download_video "$vid"; then
         video_downloaded "$vid"
-        redis-cli DEL "$v"
+        redis-cli -h $redis_host --raw DEL "$v" > /dev/null 2>&1
       fi
     done
   done
@@ -61,7 +64,7 @@ poll_videos() {
 
 queue_video() {
   local url="$1"
-  local video_id=$(echo "${url#*v=}")
+  local video_id=$(echo $url | grep -o -E 'v=.{11}' | cut -d = -f2)
 
   curl "$beehive_host:$beehive_port/$video_id" \
        --header "Content-Type: application/json" \
@@ -93,14 +96,14 @@ case $1 in
       echo "No videos."
     else
       echo "Videos awaiting to be downloaded:"
-      redis-cli --raw keys "/youtube-dl/*"
+      redis-cli -h $redis_host --raw keys "/youtube-dl/*"
       echo
       echo "Run 'beeydl poll' to download them."
     fi
     ;;
   clear)
     if ! queue_empty; then
-      redis-cli --raw --scan --pattern "/youtube-dl/*" | xargs redis-cli del 
+      redis-cli -h $redis_host --raw --scan --pattern "/youtube-dl/*" | xargs redis-cli -h $redis_host del > /dev/null 2>&1
       echo "Video download queue cleared."
     fi
     ;;

@@ -60,20 +60,21 @@ Downloading videos:
 
 ## Usage
 
-Needs a local Redis server to be running.
+The easiest way is to clone this repository and use the `docker-compose.yml` file included.
 
-Use the beehive config in this repo that has all the hives and chains pre-configured.
+Replace Pushover token placeholders with your own tokens.
 
-Make sure the Redis server and Beehive are running, then:
+```
+git clone https://github.com/rubiojr/beehive-youtube-dl && cd beehive-youtube-dl
+export PUSHOVER_APP_TOKEN=my-app-token
+export PUSHOVER_USER_TOKEN=my-user-token
+docker-compose up
+```
 
-**To enqueue a video**
+You can then queue videos locally using:
 
-`beeydl queue https://www.youtube.com/watch?v=os8FvDpfKfw`
+```
+./beeydl queue "https://youtube...."
+```
 
-
-**To download videos in the queue**
-
-`beeydl poll`
-
-
-`beeydl --help` will list all the options available.
+A `ydl-video` directory will be created automatically in the current directory and the videos will be downloaded there.

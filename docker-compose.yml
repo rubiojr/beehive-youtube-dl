@@ -1,0 +1,29 @@
+version: '3'
+services:
+  beehive:
+    image: beeydl
+    hostname: beehive
+    restart: always
+    ports:
+     - 8181:8181
+     - 12345:12345
+    networks:
+     - beeydl
+    depends_on:
+     - redis
+    environment:
+     - REDIS_HOST=redis
+     - PUSHOVER_USER_TOKEN=${PUSHOVER_USER_TOKEN}
+     - PUSHOVER_APP_TOKEN=${PUSHOVER_APP_TOKEN}
+    volumes:
+     - ./ydl-video:/root/video
+  redis:
+    hostname: redis
+    image: redis
+    restart: always
+    networks:
+     - beeydl
+
+networks:
+  beeydl:
+    driver: bridge
