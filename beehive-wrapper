@@ -18,4 +18,4 @@ if [ ! -f /root/config/beehive.conf ]; then
   mv beehive.conf config/
 fi
 beeydl poll > beeydl.log 2>&1 &
-exec ./beehive --config config/beehive.conf --debug --bind 0.0.0.0:8181
+exec ./beehive --config config/beehive.conf --bind 0.0.0.0:8181
