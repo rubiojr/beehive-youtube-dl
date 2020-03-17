@@ -35,7 +35,14 @@ video_downloaded() {
 
 download_video() {
   echo "Downloading $1..."
-  youtube-dl --extract-audio --audio-format mp3 --download-archive "$video_dir/archive.log" -o "$video_dir/%(title)s.%(ext)s" "$1"
+  youtube-dl -f bestvideo+bestaudio/best \
+             --extract-audio --audio-format mp3 \
+             --embed-thumbnail \
+             --add-metadata \
+             --audio-quality 0 \
+             --keep-video \
+             --download-archive "$video_dir/archive.log" \
+             -o "$video_dir/%(title)s.%(ext)s" "$1"
 }
 
 queue_empty() {
