@@ -65,7 +65,9 @@ The easiest way is to clone this repository and use the `docker-compose.yml` fil
 Replace Pushover token placeholders with your own tokens.
 
 ```
-git clone https://github.com/rubiojr/beehive-youtube-dl && cd beehive-youtube-dl
+git clone https://github.com/rubiojr/beehive-youtube-dl
+cd beehive-youtube-dl
+docker build -t beeydl .
 export PUSHOVER_APP_TOKEN=my-app-token
 export PUSHOVER_USER_TOKEN=my-user-token
 docker-compose up
