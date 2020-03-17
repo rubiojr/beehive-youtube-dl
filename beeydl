@@ -34,8 +34,8 @@ video_downloaded() {
 }
 
 download_video() {
-  youtube-dl --download-archive "$video_dir/archive.log" -o "$video_dir/%(title)s.%(ext)s" \
-             "https://youtu.be/$1"
+  echo "Downloading $1..."
+  youtube-dl --download-archive "$video_dir/archive.log" -o "$video_dir/%(title)s.%(ext)s" "$1"
 }
 
 queue_empty() {
@@ -52,7 +52,11 @@ poll_videos() {
     fi
 
     for v in $(redis-cli -h $redis_host --raw keys "/youtube-dl/*"); do
-      vid=$(echo $v | cut -d / -f3)
+      if [[ "$v" =~ ^/youtube-dl/http ]]; then
+        vid="$(echo $v | cut -d / -f3-)"
+      else
+        vid="https://youtube.com/watch?v=$(echo $v | cut -d / -f3)"
+      fi
       # Delete the video from the queue
       if download_video "$vid"; then
         video_downloaded "$vid"
