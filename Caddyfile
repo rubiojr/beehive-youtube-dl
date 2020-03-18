@@ -1,13 +1,7 @@
-test.local {
-  tls on
-  header / Strict-Transport-Security "max-age=15552000; includeSubDomains; preload"
+* {
+  proxy / minio:9000 {
+     transparent
+  }
 
-  basicauth / test secret
-  root /video
-  log stdout
-  gzip
-  browse
-
-  tls test@user.org # Your email for Let's Encrypt Verification
+  tls off
 }
-

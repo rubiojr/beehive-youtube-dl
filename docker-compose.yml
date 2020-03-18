@@ -10,7 +10,20 @@ services:
      - beeydl
     volumes:
      - ./Caddyfile:/etc/Caddyfile
-     - ./ydl-video:/video
+    environment:
+     - ACME_AGREE=true
+  minio:
+    image: minio/minio
+    hostname: minio
+    restart: always
+    networks:
+     - beeydl
+    volumes:
+     - ./buckets:/buckets
+    command: server /buckets
+    environment:
+     - MINIO_ACCESS_KEY=test123
+     - MINIO_SECRET_KEY=secret123
   beehive:
     image: beeydl
     hostname: beehive
@@ -27,7 +40,7 @@ services:
      - PUSHOVER_USER_TOKEN=${PUSHOVER_USER_TOKEN}
      - PUSHOVER_APP_TOKEN=${PUSHOVER_APP_TOKEN}
     volumes:
-     - ./ydl-video:/root/video
+     - ./buckets/ydl-video:/root/video
      - ./config:/root/config
   redis:
     hostname: redis
