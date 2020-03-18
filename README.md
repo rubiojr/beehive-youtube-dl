@@ -1,11 +1,14 @@
 # Beehive video downloader
 
+⚠️  this is a basic example not secure by default. Your files could be exposed to the world.
+
 Example [Beehive](https://github.com/muesli/beehive) based video downloader implementation.
 
 * Enqueue videos to be downloaded
 * Notifies videos have been enqueued via Pushover
 * Download enqueued videos using youtube-dl
 * Notifies when videos have been downloaded via Pushover
+* The videos will be served at http://localhost:2015 (user: test, pass: secret)
 
 Needs https://github.com/muesli/beehive/pull/272 so you'll need to build Beehive from that branch.
 

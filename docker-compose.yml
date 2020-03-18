@@ -1,5 +1,16 @@
 version: '3'
 services:
+  caddy:
+    image: abiosoft/caddy:1.0.3-no-stats
+    hostname: caddy
+    restart: always
+    ports:
+     - 2015:2015
+    networks:
+     - beeydl
+    volumes:
+     - ./Caddyfile:/etc/Caddyfile
+     - ./ydl-video:/video
   beehive:
     image: beeydl
     hostname: beehive
