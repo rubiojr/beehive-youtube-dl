@@ -9,7 +9,8 @@ services:
     networks:
      - beeydl
     volumes:
-     - ./Caddyfile:/etc/Caddyfile
+     - ./caddy/Caddyfile:/etc/Caddyfile
+     - ./caddy/config:/root/.caddy
     environment:
      - ACME_AGREE=true
   minio:
