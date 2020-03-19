@@ -41,6 +41,7 @@ download_video() {
              --add-metadata \
              --audio-quality 0 \
              --keep-video \
+             --write-info-json \
              --download-archive "$video_dir/archive.log" \
              -o "$video_dir/%(title)s.%(ext)s" "$1"
 }
