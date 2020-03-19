@@ -44,6 +44,8 @@ download_video() {
              --write-info-json \
              --download-archive "$video_dir/archive.log" \
              -o "$video_dir/%(title)s.%(ext)s" "$1"
+  # Fix info.json file permissions post donwload
+  chmod a+r "$video_dir/*.info.json"
 }
 
 queue_empty() {
