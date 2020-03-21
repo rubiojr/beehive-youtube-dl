@@ -1,5 +1,12 @@
 version: '3'
 services:
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: always
+    networks:
+      - beeydl
   caddy:
     image: abiosoft/caddy:1.0.3-no-stats
     hostname: caddy

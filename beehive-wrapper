@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+set -e
 
 REDIS_HOST=${REDIS_HOST:-localhost}
 
@@ -11,6 +12,7 @@ trap cleanup SIGTERM
 
 # First run config
 if [ ! -f /root/config/beehive.conf ]; then
+  mkdir -p config
   echo "Configuring Beehive for the first time..."
   sed -i "s/pushover_app_token/$PUSHOVER_APP_TOKEN/" beehive.conf
   sed -i "s/pushover_user_token/$PUSHOVER_USER_TOKEN/" beehive.conf
