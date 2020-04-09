@@ -1,5 +1,5 @@
 FROM golang:1.13
-WORKDIR /go/src/github.com/muesli
+WORKDIR /go/src/github.com/rubiojr
 RUN git clone https://github.com/rubiojr/beehive
 RUN cd beehive && make
 
@@ -12,5 +12,5 @@ WORKDIR /root/
 COPY beehive.conf /root/
 COPY beehive-wrapper /root/
 COPY beeydl /usr/local/bin
-COPY --from=0 /go/src/github.com/muesli/beehive/beehive .
+COPY --from=0 /go/src/github.com/rubiojr/beehive/beehive .
 CMD ["./beehive-wrapper"]

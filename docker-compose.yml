@@ -33,7 +33,7 @@ services:
      - MINIO_ACCESS_KEY=test123
      - MINIO_SECRET_KEY=secret123
   beehive:
-    image: beeydl
+    image: rubiojr/beeydl
     hostname: beehive
     restart: always
     ports:
