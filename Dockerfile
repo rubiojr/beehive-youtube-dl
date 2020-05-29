@@ -1,7 +1,7 @@
 FROM golang:1.13
 WORKDIR /go/src/github.com/rubiojr
-RUN git clone https://github.com/rubiojr/beehive
-RUN cd beehive && make
+RUN git clone https://github.com/muesli/beehive
+RUN cd beehive && git checkout rubiojr-experimental && make
 
 FROM debian:latest  
 RUN apt update && apt install -y redis-tools curl ffmpeg python
